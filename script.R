@@ -1,17 +1,36 @@
 source("require_packages.R")
 require_packages(c(
   "xml2",
-  "httr"
+  "httr",
+  "dplyr",
+  "readr"
 ))
 
 
 # HTTP GET Request
-a <- GET("https://github.com/skamper1/GitHub-Actions-R-Template")
+a <- GET("https://www.officialcharts.com/charts/uk-top-40-singles-chart/")
 
-html <- read_html(rawToChar(a$content))
+html_doc <- read_html(rawToChar(a$content))
 
-forks_counter_element <- xml_find_first(html, ".//span[@id='repo-network-counter']")
+top <- xml_find_all(html_doc, ".//div[@class=\"primis chart-item relative text-right\"]")
 
-forks_counter <- xml_integer(forks_counter_element)
+top39 <- xml_find_all(html_doc, ".//div[@class=\"chart-item relative text-right\"]")
 
-forks_counter |>  as.character() |> paste(Sys.time()) |> writeLines(format(Sys.Date(), "%m-%Y.txt"))
+top_spans <- xml_find_all(top, ".//span")
+
+select_song_and_artist <- function(node){
+  spans <- xml_find_all(node, ".//span")
+  song <- xml_text(spans[4])
+  artist <- xml_text(spans[5])
+  return(tibble(song = song, artist = artist))
+}
+
+top_row <- select_song_and_artist(top)
+
+top39_rows <- lapply(top39, select_song_and_artist)
+
+top40 <- bind_rows(top_row, top39_rows) %>% mutate(position = 1:n()) %>% select(position, song, artist)
+
+
+top40 |> write_csv(format(Sys.Date(), "%Y-Week-%V.csv"))
+
