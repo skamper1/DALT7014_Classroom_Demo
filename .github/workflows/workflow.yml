@@ -3,8 +3,8 @@ name: Name of Workflow
 on: 
   push:
   schedule:
-    # 11th minute of the 1st hour on a Monday
-    - cron: '45 14 * * 5'
+    # first minute of the ninth hour on Fridays
+    - cron: '0 8 * * 5'
 
 permissions: write-all
 
