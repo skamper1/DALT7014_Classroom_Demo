@@ -34,3 +34,4 @@ top40 <- bind_rows(top_row, top39_rows) %>% mutate(position = 1:n()) %>% select(
 
 top40 |> write_csv(format(Sys.Date(), "%Y-Week-%V.csv"))
 
+writeLines(format(Sys.time()), "timestamp.txt") # Added to make sure there is always a change to commit
